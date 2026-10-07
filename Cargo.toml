@@ -3,7 +3,7 @@
 # =============================================================================
 [package]
 name    = "lint-lang"
-version = "0.1.0"
+version = "0.2.0"
 
 # Minimum Supported Rust Version (MSRV)
 rust-version = "1.85"
@@ -16,13 +16,13 @@ license = "Apache-2.0 OR MIT"
 readme = "README.md"
 
 # Description
-description = "Lint framework: configurable rules over AST/IR emitting diagnostics."
+description = "Lint framework: configurable rules over an AST that emit diagnostics."
 
 # Keywords (5 max)
-keywords = [compiler,language,lint,analysis]
+keywords = ["compiler", "language", "lint", "analysis", "diagnostics"]
 
 # Categories
-categories = [development-tools,compilers]
+categories = ["development-tools", "compilers"]
 
 # Links
 homepage      = "https://github.com/jamesgober/lint-lang"
@@ -45,14 +45,23 @@ path = "src/lib.rs"
 # #################################
 [features]
 default = ["std"]
-std = []
-# Serialization support.
+# Links the standard library. The crate needs only `alloc`; disabling this builds
+# lint-lang under `#![no_std]` with no loss of function.
+std = ["ast-lang/std", "diag-lang/std"]
+# `Serialize`/`Deserialize` for `Level`, so rule levels can be read from a
+# configuration file.
 serde = ["dep:serde"]
 
 
 # DEPENDENCIES
 # #################################
 [dependencies]
+# The tree model lints run over: the `Node` trait, arena storage with typed `Id`
+# handles, and the iterative depth-first walk every lint run rides on.
+ast-lang = { version = "1", default-features = false }
+# The output format: every finding is a `diag-lang` diagnostic, so a lint result
+# renders through the same caret renderer as every other compiler error.
+diag-lang = { version = "1", default-features = false }
 serde = { version = "1", optional = true, default-features = false, features = ["derive", "alloc"] }
 
 
@@ -61,6 +70,8 @@ serde = { version = "1", optional = true, default-features = false, features = [
 [dev-dependencies]
 criterion = { version = "0.5", features = ["html_reports"] }
 proptest  = "1"
+# Exercises the `serde` feature's `Level` derivations in tests/serde.rs.
+serde_json = "1"
 
 [target.'cfg(loom)'.dev-dependencies]
 loom = "0.7"
