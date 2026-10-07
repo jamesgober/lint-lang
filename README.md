@@ -29,7 +29,7 @@
         <strong>MSRV is 1.85+</strong> (Rust 2024 edition). <code>no_std</code>-compatible (needs only <code>alloc</code>) and <code>#![forbid(unsafe_code)]</code>.
     </p>
     <blockquote>
-        <strong>Status: pre-1.0, in active development.</strong> The public API is being designed across the 0.x series and frozen at <code>1.0.0</code>. See <a href="./CHANGELOG.md"><code>CHANGELOG.md</code></a>.
+        <strong>1.0.0 is the API freeze.</strong> The public surface is stable and follows Semantic Versioning &mdash; no breaking changes before <code>2.0</code>. See <a href="./docs/API.md#stability"><code>docs/API.md</code></a> for the frozen-surface list and the SemVer promise, and <a href="./CHANGELOG.md"><code>CHANGELOG.md</code></a>.
     </blockquote>
 </div>
 
@@ -55,7 +55,7 @@ Configuration errors — a duplicate rule name, a level set on a rule that does 
 
 ```toml
 [dependencies]
-lint-lang = "0.2"
+lint-lang = "1"
 ```
 
 Or from the terminal:
@@ -244,8 +244,8 @@ Measured with the benchmarks in [`benches/`](./benches) (Linux/WSL2, x86_64, Rus
 | `run/walk_raw` | A bare `ast_lang::walk` that only counts nodes — the traversal floor. | ~1.8–1.9 ns/node |
 | `run/noop_rule` | One enabled rule that returns immediately — the framework's own cost. | ~4.7 ns/node |
 | `run/example_rules` | The four example rules on a 135k-node tree, building real findings. | ~1.5 ms (~11 ns/node) |
-| `rules/noop_x` | 1 → 4 → 16 enabled no-op rules over 17k nodes. | ~1 ns/node per extra rule |
-| `run/all_allowed` | Every rule allowed, 135k-node tree. | ~1.4 ns total (walk skipped) |
+| `rules/noop_x` | 1 → 4 → 16 enabled no-op rules over 17k nodes. | ~1.0–1.2 ns/node per extra rule |
+| `run/all_allowed` | Every rule allowed, 135k-node tree. | ~1.3–1.4 ns total (walk skipped) |
 
 Run them yourself:
 

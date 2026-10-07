@@ -116,9 +116,10 @@
 //!
 //! ## Stability
 //!
-//! The crate is pre-1.0: the API is designed across the 0.x series and frozen at
-//! `1.0.0`. The full surface is catalogued in
-//! [`docs/API.md`](https://github.com/jamesgober/lint-lang/blob/main/docs/API.md).
+//! The public surface is frozen and stable as of `1.0.0`: it follows Semantic
+//! Versioning, with no breaking changes before `2.0`. The full surface, the
+//! behavioural guarantees, and the SemVer promise are catalogued in
+//! [`docs/API.md`](https://github.com/jamesgober/lint-lang/blob/main/docs/API.md#stability).
 
 #![cfg_attr(not(feature = "std"), no_std)]
 #![cfg_attr(docsrs, feature(doc_cfg))]

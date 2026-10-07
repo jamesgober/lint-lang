@@ -21,6 +21,25 @@
 
 ---
 
+## [1.0.0] - 2026-07-08
+
+API freeze. The public surface introduced in 0.2.0 is now stable and frozen under
+Semantic Versioning: no breaking changes ship before `2.0`. There are no code
+changes from 0.2.0 — this release fixes the contract and completes the roadmap.
+
+### Changed
+
+- Bumped the crate version to `1.0.0` and declared the public API stable.
+- `docs/API.md` marked stable, with a new **Stability** section recording the
+  frozen surface, the behaviour that is part of the contract (finding order,
+  `Allow` rules never called, level-to-severity mapping, unchanged linter on a
+  configuration error, text and `serde` forms of `Level`), what may change in a
+  minor release, and the dependency and MSRV (1.85) policy.
+- `README.md` and the crate-level docs point at the stability promise; install
+  snippets now use `lint-lang = "1"`.
+
+---
+
 ## [0.2.0] - 2026-07-08
 
 The core, and the hard part of the roadmap: the scaffold becomes a working lint
@@ -94,6 +113,7 @@ Initial scaffold and repository bootstrap. No domain logic yet &mdash; this rele
 - `.github/workflows/ci.yml` CI matrix; `deny.toml`, `clippy.toml`, `rustfmt.toml`.
 - `dev/DIRECTIVES.md` and `dev/ROADMAP.md` (committed engineering standards + plan).
 
-[Unreleased]: https://github.com/jamesgober/lint-lang/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/jamesgober/lint-lang/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/jamesgober/lint-lang/compare/v0.2.0...v1.0.0
 [0.2.0]: https://github.com/jamesgober/lint-lang/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/jamesgober/lint-lang/releases/tag/v0.1.0

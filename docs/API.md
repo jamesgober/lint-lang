@@ -14,9 +14,10 @@
 </div>
 <br>
 
-> Complete reference for every public item in `lint-lang` **0.2**, with examples.
-> **Status: pre-1.0.** The surface is designed across the 0.x series and frozen at
-> `1.0.0`; see [`../dev/ROADMAP.md`](../dev/ROADMAP.md).
+> Complete reference for every public item in `lint-lang` **1.x**, with examples.
+> **Status: stable (1.0).** The surface below is the `1.0` contract; it follows
+> [Semantic Versioning](#stability) and will not change in a breaking way before
+> `2.0`. See [`../dev/ROADMAP.md`](../dev/ROADMAP.md).
 
 <h4 id="example-pointers">Example Pointers</h4>
 
@@ -78,6 +79,7 @@
   - [Linting many files in parallel](#linting-many-files-in-parallel)
 - **[Performance Notes](#performance-notes)**
 - **[Guarantees](#guarantees)**
+- **[Stability](#stability)**
 
 <br>
 
@@ -87,7 +89,7 @@
 
 ```toml
 [dependencies]
-lint-lang = "0.2"
+lint-lang = "1"
 ```
 
 Or from the terminal:
@@ -100,7 +102,7 @@ MSRV: Rust 1.85 (Rust 2024 edition). With the `serde` feature:
 
 ```toml
 [dependencies]
-lint-lang = { version = "0.2", features = ["serde"] }
+lint-lang = { version = "1", features = ["serde"] }
 ```
 
 ---
@@ -1713,7 +1715,7 @@ assert_eq!(diag.primary().span(), Span::new(3, 7));
 
 ```toml
 [dependencies]
-lint-lang = { version = "0.2", default-features = false }
+lint-lang = { version = "1", default-features = false }
 ```
 
 ---
@@ -1893,8 +1895,8 @@ assert_eq!(total, 4);
 - **Cost model.** A run is `O(nodes × enabled rules)` calls of `check`, over a
   single walk. Measured on x86_64 (see the README's table): the bare walk is
   ~1.9 ns/node; one enabled no-op rule brings it to ~4.7 ns/node; each further
-  enabled rule adds ~1 ns/node (one dynamic call); everything allowed is a constant
-  ~1.4 ns regardless of tree size.
+  enabled rule adds ~1.0–1.2 ns/node (one dynamic call); everything allowed is a constant
+  ~1.3–1.4 ns regardless of tree size.
 - **Disabled means free.** `Allow` rules are skipped in the inner loop, and with
   no enabled rules the walk is skipped entirely. Prefer `default_level =
   Level::Allow` for expensive opt-in rules over checking a flag inside `check`.
@@ -1922,6 +1924,61 @@ assert_eq!(total, 4);
 - **Thread-safe sharing.** `Linter<N>: Send + Sync` for every `N`; `run` takes
   `&self`.
 - **`#![forbid(unsafe_code)]`** and `no_std`-compatible.
+
+---
+
+## Stability
+
+As of `1.0.0` the public API is **stable** and follows
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html). No breaking change
+ships before `2.0`. New functionality arrives in minor releases; fixes in patch
+releases.
+
+### The frozen surface
+
+| Item | Frozen contract |
+|---|---|
+| `Rule<N>` | Supertraits `Send + Sync`; required `name` and `check(&self, &N, &mut Context<'_, N>)`; provided `default_level` returning `Level::Warn`. |
+| `Linter<N>` | `new` (`const`), `register`, `set_level`, `level`, `rules`, `len`, `is_empty`, `run`, `run_into`; `Default`, `Debug`; `Send + Sync` for every `N`. |
+| `Context<'a, N>` | `arena`, `id`, `parent`, `ancestors`, `depth`, `rule`, `severity`, `report`, `emit`; `Debug`. |
+| `Level` | Exactly three variants, `Allow`, `Warn`, `Deny` — an **exhaustive** enum, so a `match` needs no wildcard arm. `severity`, `as_str`, `Display`, `FromStr`; ordering `Allow < Warn < Deny`. |
+| `Finding` | `rule`, `diagnostic`, `severity`, `is_error`, `into_diagnostic`; `Display`; `Clone`, `Debug`, `PartialEq`, `Eq`. |
+| `LintError` | `#[non_exhaustive]`; variants `DuplicateRule { name }`, `UnknownRule { name }`, `InvalidLevel { input }`; `core::error::Error`. |
+| Re-exports | `Arena`, `Id`, `Node`, `Span` (from `ast-lang` 1.x) and `Diagnostic`, `Label`, `Severity` (from `diag-lang` 1.x). |
+
+### Behaviour that is part of the contract
+
+- **Finding order.** Depth-first pre-order by node, then rule registration order.
+- **`Allow` means not called.** A rule at `Level::Allow` is never invoked, and a
+  linter with no enabled rule does not walk the tree.
+- **Level mapping.** `Warn` → `Severity::Warning`, `Deny` → `Severity::Error` for
+  findings recorded through `Context::report`.
+- **Configuration failures leave the linter unchanged.** A rejected `register` or
+  `set_level` has no effect.
+- **Stale roots.** A `root` that names no node in the arena yields no findings.
+- **Text forms.** `Level::as_str` / `Display` / `FromStr` use `allow`, `warn`,
+  `deny` (parsing ignores ASCII case). `Finding`'s `Display` is
+  `severity[rule]: message`.
+- **`serde` representation.** With the `serde` feature, `Level` serializes as the
+  lowercase strings `"allow"`, `"warn"`, `"deny"`, and deserializes from exactly
+  those strings.
+
+### What may change in a minor release
+
+- New provided (defaulted) methods on `Rule`, and new methods on `Linter`,
+  `Context`, `Finding`, and `Level`.
+- New `LintError` variants (the enum is `#[non_exhaustive]`).
+- The exact wording of `LintError`'s `Display` messages. Match on variants, not
+  on message text.
+- Internal implementation and performance characteristics (tracked by the
+  benchmarks in `benches/`), as long as the behaviour above holds.
+
+### Dependencies and MSRV
+
+The re-exported `ast-lang` and `diag-lang` types are part of this crate's API, so
+those dependencies stay on their `1.x` lines for the whole `1.x` series; moving to
+a new major version of either would be a `2.0` change here. The minimum supported
+Rust version is **1.85**; it is raised only in a minor release, never in a patch.
 
 <br>
 

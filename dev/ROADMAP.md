@@ -48,7 +48,17 @@ Later-minor candidates (additive, not 1.0 requirements): a global "treat warning
 as errors" switch, per-rule descriptions for `--explain`, and rule-group
 configuration.
 
-## v1.0.0 - API freeze
+## v1.0.0 - API freeze (DONE)
 Public surface stable and frozen until 2.0.
-- [ ] docs/API.md marked stable; SemVer promise recorded.
-- [ ] Full test + benchmark suite green on all three platforms.
+- [x] docs/API.md marked stable; SemVer promise recorded.
+- [x] Full test + benchmark suite green on all three platforms.
+
+Shipped 2026-07-08. No code changes from 0.2.0; the surface (`Rule`, `Linter`,
+`Context`, `Level`, `Finding`, `LintError`, and the `ast-lang`/`diag-lang`
+re-exports) is frozen, and the run semantics (finding order, `Allow` rules never
+called, level-to-severity mapping), the text and `serde` forms of `Level`, and MSRV
+1.85 are recorded as part of the contract in `docs/API.md#stability`. Verified
+locally on Linux (WSL2, stable + 1.85) and Windows (stable); macOS is covered by the
+CI matrix. `Level` is frozen as an exhaustive three-variant enum and `Rule` keeps
+its `Send + Sync` supertraits — both deliberate. Only additive 1.x work remains
+(see the later-minor candidates above).
